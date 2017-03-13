@@ -1,0 +1,464 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <script src="components/loader.js"></script>
+  <link rel="stylesheet" href="components/loader.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script src="js/cssua.min.js"></script>
+  <script type="text/javascript" src="js/calendar.js"></script>
+</head>
+<body>
+
+  <!-- Title Page -->
+  <div data-role="page" id="LoginPage">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>家計簿+スケジュール管理アプリ</h1>
+    </header>
+      <section data-role="content">
+        <a href="#LoginPage2" data-role="button" data-theme="b">始める</a>
+        <div style="position:absolute; bottom:0px; right:0px;">Now Loading............<br><br></div>
+      </section>
+  </div>
+
+  <!-- Login Page -->
+  <div data-role="page" id="LoginPage2">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>ログイン</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+    </header>
+      <section data-role="content">
+      ユーザー名:
+        <input type="text" id="login_email">
+      パスワード:
+        <input type="password" id="login_password">
+      新規追加はココから→
+        <a href="#RegisterPage" data-role="button" data-mini="true" data-inline="true" data-theme="b">新規追加</a>
+        <a href="#" id="LoginBtn" data-role="button" data-inline="false" data-theme="b">ログイン</a>
+      </section>
+  </div>
+
+  <!-- Register Page -->
+  <div data-role="page" id="RegisterPage">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>新規追加</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+    </header>
+      <section data-role="content">
+      ユーザー名:
+        <input type="text" id="reg_email">
+      パスワード:
+        <input type="password" id="reg_password">
+        <a href="#" id="RegisterBtn" data-role="button" data-inline="false" data-theme="b">新規追加</a>
+      </section>
+  </div>
+
+  <!-- Calendar Page -->
+  <div data-role="page" id="CalendarPage">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>カレンダー</h1>
+      <a data-role="button" data-theme="b" data-rel="back">Logout</a>
+    </header>
+    <section data-role="content">
+      <form name="choice">
+        <label class="checkbox checkbox--noborder checkbox--list-item">
+          <input id="householdaccount" type="radio" name="choice" checked="checked">家計簿
+        </label>
+        <label class="checkbox checkbox--noborder checkbox--list-item">
+          <input id="schedulemanagement" type="radio" name="choice">スケジュール管理
+        </label>
+      </form>
+      <h2>
+        <style type="text/css">
+          table {
+            align: center;
+            border: solid 1px #000000;
+          }
+          th {
+            border: solid 1px #000000;,
+          }
+          td {
+            border: solid 1px #000000;
+          }
+          .tdlink {
+            cursor: pointer;
+            // display: block;
+          }
+          .tdlink:hover {
+            background-color: #ff0000;
+          }
+        </style>
+        <div id="result"></div>
+      </h2>
+      <input type="button" onclick="setCalendar();return false;" value="今月のカレンダー" data-theme="b">
+    </section>
+  </div>
+
+  <!-- Household Account Page -->
+  <div data-role="page" id="HouseholdAccountPage">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>家計簿</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+    </header>
+    <section data-role="content">
+      <h2>
+        <div id="printDayH" align="center"></div>
+        <br><div align='left'>収入</div>
+      </h2>
+      <div align='right'><input type='text' id='revenue' style='text-align:right;' disabled>円</div>
+      <input type='button' onclick="location.href='#ListPageRe'" value='確認' data-theme="b">
+      <h2><div align='left'>支出</div></h2>
+      <div align='right'><input type='text' id='spending' style='text-align:right;' disabled>円</div>
+      <input type='button' onclick="location.href='#ListPageSp'" value='確認' data-theme="b">
+      <h2><div align='left'>残高</div></h2>
+      <div align='right'><input type='text' id='balance' style='text-align:right;' disabled>円</div><br>
+      <input type='button' onclick="location.href='#StockManagementPage'" value='ストック管理' data-theme="b">
+      <div style="position:absolute; bottom:0px;">※上手く表示されない場合は1度カレンダーに戻って少し時間をおいてから試してください。<br><br></div>
+    </section>
+  </div>
+
+  <!-- Revenue List Page -->
+  <div data-role="page" id="ListPageRe">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>収入確認</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <a href="#AddPageRe" data-theme="b" data-icon="plus" class="ui-btn-right">Add</a>
+    </header>
+    <section data-role="content">
+      <ul id="TopListViewRe" data-role="listview"
+        data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-split-icon="delete">
+      </ul>
+
+      <!--Dialog box confirming delete-->
+      <div data-role="popup" id="yesNoDialog_deleteRe" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="c" class="ui-corner-top" data-theme="c" style="top: 0 !important;">
+          <h1>確認:</h1>
+        </div>
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <h3 class="ui-title">
+          <p>これを削除してもよろしいですか?</p>
+          <a href="#" id="YesBtn_deleteRe" data-role="button" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
+          <a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">No</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Add Revenue Page -->
+  <div data-role="page" id="AddPageRe">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>収入追加</h1>
+    </header>
+    <section data-role="content">
+      項目:<input type="text" id="breakdown"><br>
+      金額:<input type="text" id="revenue2"><br>
+      <div align="right">円</div><br>
+      <a href="#" data-rel="dialog" data-transition="pop" data-theme="b" data-role="button" data-icon="check" id="SaveBtnRe">Save</a>
+
+      <!--Dialog box of successful adding-->
+      <div data-role="popup" id="okDialog_addRe" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>収入が正常に追加されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Revenue Page -->
+  <div data-role="page" id="ShowPageRe">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>収入更新</h1>
+    </header>
+    <section data-role="content">
+      項目:<input type="text" id="breakdown_edit"><br>
+      金額:<input type="text" id="revenue_edit"><br>
+      <a href="#" data-theme="b" data-role="button" data-icon="check" id="UpdateBtnRe">Update</a>
+
+     <!--Dialog box of successful updating-->
+      <div data-role="popup" id="okDialog_editRe" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>収入が正常に更新されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Spending List Page -->
+  <div data-role="page" id="ListPageSp">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>支出確認</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <a href="#AddPageSp" data-theme="b" data-icon="plus" class="ui-btn-right">Add</a>
+    </header>
+    <section data-role="content">
+      <ul id="TopListViewSp" data-role="listview"
+        data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-split-icon="delete">
+      </ul>
+
+      <!--Dialog box confirming delete-->
+      <div data-role="popup" id="yesNoDialog_deleteSp" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="c" class="ui-corner-top" data-theme="c" style="top: 0 !important;">
+          <h1>確認:</h1>
+        </div>
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <h3 class="ui-title">
+          <p>これを削除してもよろしいですか?</p>
+          <a href="#" id="YesBtn_deleteSp" data-role="button" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
+          <a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">No</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Add Spending Page -->
+  <div data-role="page" id="AddPageSp">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>支出追加</h1>
+    </header>
+    <section data-role="content">
+      項目:<input type="text" id="breakdownSp"><br>
+      金額:<input type="text" id="spending2"><br>
+      <div align="right">円</div><br>
+      <a href="#" data-rel="dialog" data-transition="pop" data-theme="b" data-role="button" data-icon="check" id="SaveBtnSp">Save</a>
+
+      <!--Dialog box of successful adding-->
+      <div data-role="popup" id="okDialog_addSp" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>収入が正常に追加されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Spending Page -->
+  <div data-role="page" id="ShowPageSp">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>支出更新</h1>
+    </header>
+    <section data-role="content">
+      項目:<input type="text" id="breakdown_editSp"><br>
+      金額:<input type="text" id="spending_edit"><br>
+      <a href="#" data-theme="b" data-role="button" data-icon="check" id="UpdateBtnSp">Update</a>
+
+     <!--Dialog box of successful updating-->
+      <div data-role="popup" id="okDialog_editSp" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>支出が正常に更新されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Stock Management Page -->
+  <div data-role="page" id="StockManagementPage">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>ストック管理</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <a href="#AddPageSt" data-theme="b" data-icon="plus" class="ui-btn-right">Add</a>
+    </header>
+    <section data-role="content">
+      <ul id="TopListViewSt" data-role="listview" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-split-icon="delete">
+      </ul>
+
+      <!--Dialog box confirming delete-->
+      <div data-role="popup" id="yesNoDialog_deleteSt" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="c" class="ui-corner-top" data-theme="c" style="top: 0 !important;">
+          <h1>確認:</h1>
+        </div>
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <h3 class="ui-title">
+          <p>この商品を削除してもよろしいですか?</p>
+          <a href="#" id="YesBtn_deleteSt" data-role="button" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
+          <a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">No</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Add Stock Page -->
+  <div data-role="page" id="AddPageSt">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>ストック追加</h1>
+    </header>
+    <section data-role="content">
+      <label for="product">商品:</label>
+      <input type="text" id="product">
+      <label for="number">個数:</label>
+      <select name="number" id="number">
+        <script>
+          for(i=0;i<31;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>select>
+      </select><br>
+      <a href="#" data-rel="dialog" data-transition="pop" data-theme="b" data-role="button" data-icon="check" id="SaveBtnSt">Save</a>
+
+      <!--Dialog box of successful adding-->
+      <div data-role="popup" id="okDialog_addSt" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>商品が正常に追加されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Stock Page -->
+  <div data-role="page" id="EditPageSt" data-cache="never">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>個数変更</h1>
+    </header>
+    <section data-role="content">
+      <label for="product_edit">商品:</label>
+      <input type="text" id="product_edit" disabled>
+      <label for="number">個数:</label>
+      <select name="number_edit" id="number_edit">
+        <script>
+          for(i=0;i<31;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>
+      </select><br>
+      <a href="#" data-theme="b" data-role="button" data-icon="check" id="UpdateBtnSt">Update</a>
+
+     <!--Dialog box of successful updating-->
+      <div data-role="popup" id="okDialog_editSt" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>個数が正常に更新されました!</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Schedule List Page -->
+  <div data-role="page" id="ListPageSc">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <h1>予定一覧</h1>
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <a href="#AddPageSc" data-theme="b" data-icon="plus" class="ui-btn-right">Add</a>
+    </header>
+    <section data-role="content">
+      <h2>
+        <div id="printDayS" align="center"></div>
+      </h2>
+      <p class="sample2">
+      <ul id="TopListViewSc" data-role="listview"
+        data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-split-icon="delete">
+      </ul></p>
+
+      <!--Dialog box confirming delete-->
+      <div data-role="popup" id="yesNoDialog_deleteSc" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="c" class="ui-corner-top" data-theme="c" style="top: 0 !important;">
+          <h1>確認:</h1>
+        </div>
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <h3 class="ui-title">
+          <p>この予定を削除してもよろしいですか?</p>
+          <a href="#" id="YesBtn_deleteSc" data-role="button" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
+          <a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">No</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Add Schedule Page -->
+  <div data-role="page" id="AddPageSc">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>スケジュール追加画面</h1>
+    </header>
+    <section data-role="content">
+      <select name="time" id="time">
+        <script>
+          for(i=0;i<24;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>
+      </select>時
+      <select name="time2" id="time2">
+        <script>
+          for(i=0;i<60;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>
+      </select>分<br><br>
+      <label for="title">予定:</label>
+      <input type="text" id="title">
+      <label for="Memo">スケジュール内容:</label>
+      <textarea id="content" style="height: 8em"></textarea>
+      <a href="#" data-rel="dialog" data-transition="pop" data-theme="b" data-role="button" data-icon="check" id="SaveBtnSc">Save</a>
+
+      <!--Dialog box of successful adding-->
+      <div data-role="popup" id="okDialog_addSc" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>追加されました</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Detail Page -->
+  <div data-role="page" id="ShowPageSc">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <a href="#" data-theme="b" class="ui-btn-right" id="EditBtnSc">Edit</a>
+      <h1 id="title_show"></h1>
+    </header>
+    <section data-role="content">
+      <p id="content_show"></p>
+    </section>
+  </div>
+
+   <!-- Edit Schedule Page -->
+  <div data-role="page" id="EditPageSc" data-cache="never">
+    <header data-role="header" data-position="fixed" data-theme="c">
+      <a data-role="button" data-theme="b" data-rel="back" data-icon="back">Back</a>
+      <h1>編集画面</h1>
+    </header>
+    <section data-role="content">
+      <select name="time" id="time_edit">
+        <script>
+          for(i=0;i<24;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>
+      </select>時
+      <select name="time2" id="time2_edit">
+        <script>
+          for(i=0;i<60;i++){
+            document.write('<option value="' + i + '">' + i + '</option>\n');
+          }
+        </script>
+      </select>分<br><br>
+      <label for="title_edit">予定:</label>
+      <input type="text" id="title_edit">
+      <label for="Memo">スケジュール内容:</label>
+      <textarea id="content_edit" style="height: 8em"></textarea>
+      <a href="#" data-theme="b" data-role="button" data-icon="check" id="UpdateBtnSc">Update</a>
+
+     <!--Dialog box of successful updating-->
+      <div data-role="popup" id="okDialog_editSc" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div align="middle" data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <p>更新されました</p>
+          <a href="#" data-role="button" id="OkBtn" data-inline="true" data-transition="flow" data-theme="b">OK</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
